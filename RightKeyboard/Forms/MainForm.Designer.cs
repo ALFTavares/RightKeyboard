@@ -1,4 +1,4 @@
-namespace RightKeyboard
+namespace RightKeyboard.Forms
 {
     partial class MainForm
     {

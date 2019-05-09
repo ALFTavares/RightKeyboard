@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using RightKeyboard.Win32;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.IO;
-using System.Globalization;
 
-namespace RightKeyboard
+namespace RightKeyboard.Forms
 {
     public partial class MainForm : Form
     {
@@ -25,7 +25,7 @@ namespace RightKeyboard
         {
             InitializeComponent();
 
-            RAWINPUTDEVICE rawInputDevice = new RAWINPUTDEVICE(1, 6, API.RIDEV_INPUTSINK, this);
+            var rawInputDevice = new RAWINPUTDEVICE(1, 6, API.RIDEV_INPUTSINK, this);
             var ok = API.RegisterRawInputDevices(rawInputDevice);
 
             if (!ok)
@@ -111,7 +111,7 @@ namespace RightKeyboard
 
         private static string GetConfigFilePath()
         {
-            string configFileDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RightKeyboard");
+            var configFileDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RightKeyboard");
             if (!Directory.Exists(configFileDir))
             {
                 Directory.CreateDirectory(configFileDir);
@@ -124,12 +124,12 @@ namespace RightKeyboard
         {
             foreach (API.RAWINPUTDEVICELIST rawInputDevice in API.GetRawInputDeviceList())
             {
-                if (rawInputDevice.dwType == API.RIM_TYPEKEYBOARD)
-                {
-                    IntPtr deviceHandle = rawInputDevice.hDevice;
-                    string deviceName = API.GetRawInputDeviceName(deviceHandle);
-                    _devicesByName.Add(deviceName, deviceHandle);
-                }
+                if (rawInputDevice.dwType != API.RIM_TYPEKEYBOARD)
+                    continue;
+
+                var deviceHandle = rawInputDevice.hDevice;
+                var deviceName = API.GetRawInputDeviceName(deviceHandle);
+                _devicesByName.Add(deviceName, deviceHandle);
             }
         }
 

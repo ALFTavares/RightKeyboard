@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
@@ -49,22 +50,25 @@ namespace RightKeyboard
         /// <returns></returns>
         public static Layout[] GetLayouts()
         {
-            if (_cachedLayouts == null)
+            var projectFolder = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName;
+            var file = Path.Combine(projectFolder, @"resources\Layouts.txt");
+
+            if (_cachedLayouts != null)
+                return _cachedLayouts;
+
+            var layouts = new List<Layout>();
+            using (var input = File.OpenRead(file))
             {
-                var layouts = new List<Layout>();
-                using (Stream input = Assembly.GetExecutingAssembly().GetManifestResourceStream("RightKeyboard.Layouts.txt"))
+                using (TextReader reader = new StreamReader(input ?? throw new FileNotFoundException("Couldn't locate Layouts.txt file")))
                 {
-                    using (TextReader reader = new StreamReader(input ?? throw new FileNotFoundException("Couldn't locate Layout.txt file")))
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
                     {
-                        string line;
-                        while ((line = reader.ReadLine()) != null)
-                        {
-                            layouts.Add(GetLayout(line));
-                        }
+                        layouts.Add(GetLayout(line));
                     }
                 }
-                _cachedLayouts = layouts.ToArray();
             }
+            _cachedLayouts = layouts.ToArray();
             return _cachedLayouts;
         }
 

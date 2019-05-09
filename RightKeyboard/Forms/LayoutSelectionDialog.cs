@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using RightKeyboard.Win32;
 
-namespace RightKeyboard {
+namespace RightKeyboard.Forms {
 	public partial class LayoutSelectionDialog : Form {
 		public LayoutSelectionDialog() {
 			InitializeComponent();
