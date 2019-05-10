@@ -1,64 +1,91 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows.Forms;
 using RightKeyboard.Win32;
 
-namespace RightKeyboard.Forms {
-	public partial class LayoutSelectionDialog : Form {
-		public LayoutSelectionDialog() {
-			InitializeComponent();
+namespace RightKeyboard.Forms
+{
+    public partial class LayoutSelectionDialog : Form
+    {
+        #region properties
 
-			LoadLanguageList();
-		}
+        private int _recentLayoutsCount;
+        private bool _okPressed;
 
-		private void LoadLanguageList() {
-			lbLayouts.Items.Clear();
-			recentLayoutsCount = 0;
+        public new Layout Layout { get; private set; }
 
-			IntPtr[] installedLayouts = API.GetKeyboardLayoutList();
+        #endregion
 
-			foreach(Layout layout in Layout.GetLayouts()) {
-				foreach(IntPtr installedLayout in installedLayouts) {
-					ushort languageId = unchecked((ushort)installedLayout.ToInt32());
-					if(layout.Identifier == languageId) {
-						lbLayouts.Items.Add(layout);
-					}
-				}
-			}
+        #region CTOR
 
-			lbLayouts.SelectedIndex = 0;
-		}
+        public LayoutSelectionDialog()
+        {
+            InitializeComponent();
+            LoadLanguageList();
+        }
 
-		private int recentLayoutsCount = 0;
-		private Layout selectedLayout;
-		private bool okPressed = false;
+        #endregion
 
-		public new Layout Layout {
-			get {
-				return selectedLayout;
-			}
-		}
+        #region private methods
 
-		private void btOk_Click(object sender, EventArgs e) {
-			selectedLayout = (Layout)lbLayouts.SelectedItem;
-			okPressed = true;
-			Close();
-		}
+        private void LoadLanguageList()
+        {
+            lbLayouts.Items.Clear();
+            _recentLayoutsCount = 0;
 
-		private void lbLayouts_SelectedIndexChanged(object sender, EventArgs e) {
-			btOk.Enabled = lbLayouts.SelectedIndex != recentLayoutsCount || recentLayoutsCount == 0;
-		}
+            var installedLayouts = API.GetKeyboardLayoutList();
 
-		private void lbLayouts_DoubleClick(object sender, EventArgs e) {
-			if(btOk.Enabled) {
-				btOk_Click(this, EventArgs.Empty);
-			}
-		}
+            foreach (var layout in Layout.GetLayouts())
+            {
+                foreach (var installedLayout in installedLayouts)
+                {
+                    var languageId = unchecked((ushort)installedLayout.ToInt32());
 
-		protected override void OnClosing(CancelEventArgs e) {
-			e.Cancel = !okPressed;
-			okPressed = false;
-			base.OnClosing(e);
-		}
-	}
+                    if (layout.Identifier == languageId)
+                        lbLayouts.Items.Add(layout);
+                }
+            }
+
+
+            //Layout.GetLayouts().ToList().ForEach(layout => installedLayouts.ForEach(installedLayout =>
+            //{
+            //    var languageId = unchecked((ushort)installedLayout.ToInt32());
+
+            //    if (layout.Identifier == languageId)
+            //        lbLayouts.Items.Add(layout);
+            //}));
+
+            lbLayouts.SelectedIndex = 0;
+        }
+
+        private void btOk_Click(object sender, EventArgs e)
+        {
+            Layout = (Layout)lbLayouts.SelectedItem;
+            _okPressed = true;
+            Close();
+        }
+
+        private void lbLayouts_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            btOk.Enabled = lbLayouts.SelectedIndex != _recentLayoutsCount || _recentLayoutsCount == 0;
+        }
+
+        private void lbLayouts_DoubleClick(object sender, EventArgs e)
+        {
+            if (btOk.Enabled)
+            {
+                btOk_Click(this, EventArgs.Empty);
+            }
+        }
+
+        #endregion
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            e.Cancel = !_okPressed;
+            _okPressed = false;
+            base.OnClosing(e);
+        }
+    }
 }
